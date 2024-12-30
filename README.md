@@ -36,7 +36,7 @@ Please refer to how to use ControlCAN.
 
 **NOTE**: In fact, the serial TTL CAN module supports 14 filters, and any baud rate within 1M.    
 The Timing list is intended to be compatible with ControlCAN usage.    
-For details, please refer to it SerialCAN.InitCAN
+For details, please refer to [SerialCAN.InitCAN](/ControlCAN/SerialCAN.cs)
 
 ## TODO
 
