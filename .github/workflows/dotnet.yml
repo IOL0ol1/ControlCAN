@@ -36,7 +36,11 @@ jobs:
       with:
         name: ControlCANx64
         path: ./publish/win-x64
- 
+    - uses: Shopify/upload-to-release@v1
+      with:
+        name: ControlCAN
+        path: ./publish/
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
           
       
       
