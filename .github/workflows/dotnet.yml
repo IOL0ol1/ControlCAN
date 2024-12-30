@@ -36,11 +36,29 @@ jobs:
       with:
         name: ControlCANx64
         path: ./publish/win-x64
-    - uses: Shopify/upload-to-release@v1
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
       with:
-        name: ControlCAN
-        path: ./publish/
-        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        release_name: ControlCAN
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload x86 artifact to Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./publish/win-x86/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Upload x64 artifact to Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./publish/win-x64/*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       
+      
+
       
