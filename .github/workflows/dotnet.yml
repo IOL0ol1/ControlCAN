@@ -1,12 +1,10 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
 name: .NET
 
 on:
   push:
-    tags:
-      - 'v*' 
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -25,37 +23,27 @@ jobs:
       run: dotnet publish -r win-x86 -c Release -o ./publish/win-x86
     - name: Publish x64
       run: dotnet publish -r win-x64 -c Release -o ./publish/win-x64
-    - name: Upload a Build Artifact x86
+    - name: Zip Publish Folder
+      run: |
+        Compress-Archive -Path ./publish/* -DestinationPath ./publish.zip
+    - name: Upload Build Artifact
       uses: actions/upload-artifact@v4.5.0
       with:
-        name: ControlCANx86
-        path: ./publish/win-x86/
-    - name: Upload a Build Artifact x64
-      uses: actions/upload-artifact@v4.5.0
+        name: ControlCAN
+        path: ./publish.zip
+    - name: Create GitHub Release
+      uses: gh actions/create-release@v1
       with:
-        name: ControlCANx64
-        path: ./publish/win-x64/
-
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ github.ref }} 
-        release_name: Release ${{ github.ref }} 
+        tag_name: ${{ github.sha }}
+        release_name: "Release ${{ github.sha }}"
         draft: false
         prerelease: false
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Upload x86 artifact to Release
-      uses: softprops/action-gh-release@v1
+    - name: Upload to GitHub Release
+      uses: gh actions/upload-release-asset@v1
       with:
-        tag_name: ${{ github.ref }} 
-        files: ./publish/win-x86/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Upload x64 artifact to Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: ${{ github.ref }} 
-        files: ./publish/win-x64/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./publish.zip
+        asset_name: publish.zip
+        asset_content_type: application/zip
