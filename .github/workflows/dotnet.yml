@@ -23,20 +23,19 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Publish x86
-      run: dotnet publish -r win-x86 -c Release        
+      run: dotnet publish -r win-x86 -c Release -o ./publish/win-x86
     - name: Publish x64
-      run: dotnet publish -r win-x64 -c Release   
+      run: dotnet publish -r win-x64 -c Release -o ./publish/win-x64
     - name: Upload a Build Artifact x86
       uses: actions/upload-artifact@v4.5.0
       with:
         name: ControlCANx86
-        path: \**\win-x86\publish
+        path: ./publish/win-x86
     - name: Upload a Build Artifact x64
       uses: actions/upload-artifact@v4.5.0
       with:
         name: ControlCANx64
-        path: \**\win-x64\publish
- 
+        path: ./publish/win-x64
  
           
       
