@@ -22,12 +22,20 @@ jobs:
         dotnet-version: 9.0.x
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal             
+    - name: Publish x86
+      run: dotnet publish -r win-x86 -c Release        
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v4.5.0
+      with:
+        name: ControlCANx86
+        path: \bin\Release\**\win-x86\publish
+    - name: Publish x64
+      run: dotnet publish -r win-x64 -c Release   
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v4.5.0
+      with:
+        name: ControlCANx64
+        path: \bin\Release\**\win-x64\publish
  
  
           
