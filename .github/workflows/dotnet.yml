@@ -5,9 +5,8 @@ name: .NET
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    tags:
+      - 'v*' 
 
 jobs:
   build:
@@ -26,12 +25,22 @@ jobs:
       run: dotnet publish -r win-x86 -c Release -o ./publish/win-x86
     - name: Publish x64
       run: dotnet publish -r win-x64 -c Release -o ./publish/win-x64
-    - name: Create Release
-      id: create_release
-      uses: softprops/action-gh-release@v1
+    - name: Upload a Build Artifact x86
+      uses: actions/upload-artifact@v4.5.0
       with:
-        tag_name: v1.0.0
-        release_name: Release v1.0.0
+        name: ControlCANx86
+        path: ./publish/win-x86/
+    - name: Upload a Build Artifact x64
+      uses: actions/upload-artifact@v4.5.0
+      with:
+        name: ControlCANx64
+        path: ./publish/win-x64/
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ github.ref }} 
+        release_name: Release ${{ github.ref }} 
         draft: false
         prerelease: false
       env:
@@ -39,17 +48,14 @@ jobs:
     - name: Upload x86 artifact to Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v1.0.0
+        tag_name: ${{ github.ref }} 
         files: ./publish/win-x86/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Upload x64 artifact to Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v1.0.0
+        tag_name: ${{ github.ref }} 
         files: ./publish/win-x64/*
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      
-      
