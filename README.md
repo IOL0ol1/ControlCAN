@@ -1,13 +1,17 @@
 # ControlCAN.Uart
 
 The Serial TTL CAN module of the AT command is encapsulated as a ControlCAN.dll so that it can be called by other software.
-
 AOT compilation using C# is used to generate ControlCAN.dll usable in C.
 
-ControlCAN.cs => ControlCAN.dll (Native dll)    
-EcanFDVci.cs => EcanFDVci.dll (Native dll)    
-they are all in one ControlCAN.dll.    
-if you need EcanFDVci.dll, rename by yourself.
+
+## File
+**SerialCAN.cs** => Serial TTL CAN Core.      
+**ControlCAN.cs** => ControlCAN.dll (Native dll) for CANPro.exe or other ControlCAN based software.    
+**EcanFDVci.cs** => EcanFDVci.dll (Native dll) for GCANTools.exe.       
+
+All of their export functions are in ControlCAN.dll.    
+if you need EcanFDVci.dll, rename by yourself.    
+[Download Release](https://github.com/IOL0ol1/ControlCAN/releases)
 
 
 ## How to use:
