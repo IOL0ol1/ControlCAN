@@ -71,6 +71,7 @@ namespace ControlCAN
         public byte Ext;
         public byte Dlc;
         public byte[] Data;
+        public DateTime Time;
     }
 
     public unsafe class SerialCAN
@@ -237,26 +238,34 @@ namespace ControlCAN
 
         private void SerialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if (serialPort.BytesToRead > 0)
+            try
             {
-                var buf = new byte[serialPort.BytesToRead];
-                lock (serialPort)
+                if (serialPort.BytesToRead > 0)
                 {
-                    var size = serialPort.Read(buf, 0, buf.Length);
-                    received.AddRange(buf.Take(size));
-                }
-                var a = received.IndexOf((byte)'A');
-                if (a >= 0 && received.Count > (a + 8) && received[a + 1] == (byte)'T')
-                {
-                    var len = received[a + 6];
-                    if (received.Count > a + 6 + len + 2 && received[a + 6 + len + 1] == 0x0D && received[a + 6 + len + 2] == 0x0A)
+                    var buf = new byte[serialPort.BytesToRead];
+                    lock (serialPort)
                     {
-                        var bytes = received.Skip(a).Take(6 + len + 3).ToArray();
-                        logger.Info($"Received {serialPort.PortName} Bytes:{BitConverter.ToString(bytes)}");
-                        messages.Add(Convert(bytes));
-                        received.RemoveRange(0, a + 6 + len + 3);
+                        var size = serialPort.Read(buf, 0, buf.Length);
+                        received.AddRange(buf.Take(size));
+                    }
+                    var a = received.IndexOf((byte)'A');
+                    if (a >= 0 && received.Count > (a + 8) && received[a + 1] == (byte)'T')
+                    {
+                        var len = received[a + 6];
+                        if (received.Count > a + 6 + len + 2 && received[a + 6 + len + 1] == 0x0D && received[a + 6 + len + 2] == 0x0A)
+                        {
+                            var bytes = received.Skip(a).Take(6 + len + 3).ToArray();
+                            logger.Info($"Received {serialPort.PortName} Bytes:{BitConverter.ToString(bytes)}");
+                            messages.Add(Convert(bytes));
+                            received.RemoveRange(0, a + 6 + len + 3);
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex, "Serial received error");
+                received.Clear();
             }
         }
 
@@ -332,7 +341,8 @@ namespace ControlCAN
                 {
                     for (; i < Len; i++)
                     {
-                        var buf = Convert(frames[i]);
+                        var frame = frames[i];
+                        var buf = Convert(frame);
                         logger.Info($"Transmit {serialPort.PortName} {canIndex} Bytes:{BitConverter.ToString(buf)}");
                         lock (serialPort)
                             serialPort.Write(buf, 0, buf.Length);
@@ -374,13 +384,24 @@ namespace ControlCAN
             return 1;
         }
 
+        /* serial data
+         * 00000000 00100000 00000000 00000000
+         * 00000000 00100000 00000000 00000010
+         * 00000000 00000000 00000000 00001110
+         * 00000000 00000000 00000000 00001100
+         * |<---------|std id[0]
+         * |<-----------------------------|ext id[0]
+         *                                 |0:std 1:ext
+         *                                  |0:data 1:rtr
+         */
+
         private static byte[] Convert(SerialFrame obj)
         {
             int ext = obj.Ext == 0 ? 0 : 1;
             int rtr = obj.Rtr == 0 ? 0 : 1;
-            int value = ((int)obj.Id << (ext == 0 ? 21 : 3)) | ext << 2 | rtr << 1;
+            int data = ((int)obj.Id << (ext == 0 ? 21 : 3)) | ext << 2 | rtr << 1;
             var outputs = new List<byte>(Encoding.ASCII.GetBytes("AT"));
-            outputs.AddRange(BitConverter.GetBytes(value).Reverse());
+            outputs.AddRange(BitConverter.GetBytes(data).Reverse());
             outputs.Add(rtr == 0 ? obj.Dlc : (byte)0);
             if (rtr == 0 && obj.Dlc > 0)
                 outputs.AddRange(new Span<byte>(obj.Data, 0, obj.Dlc).ToArray());
@@ -390,30 +411,21 @@ namespace ControlCAN
 
         private static SerialFrame Convert(byte[] data)
         {
-            /* data
-             * 00000000 00100000 00000000 00000000
-             * 00000000 00100000 00000000 00000010
-             * 00000000 00000000 00000000 00001110
-             * 00000000 00000000 00000000 00001100
-             * |<---------|std id[0]
-             * |<-----------------------------|ext id[0]
-             *                                 |0:std 1:ext
-             *                                  |0:data 1:rtr
-             */
             var ident = BitConverter.ToUInt32(data.Skip(2).Take(4).Reverse().ToArray());
-            var len = data[6];
             var ext = (byte)((ident >> 2) & 1);
+            var rtr = (byte)((ident >> 1) & 1);
+            var len = data[6];
             var frame = new SerialFrame
             {
+                Time = DateTime.Now,
                 Id = ident >> (ext == 0 ? 21 : 3),
                 Ext = ext,
-                Rtr = (byte)((ident >> 1) & 1),
+                Rtr = rtr,
                 Dlc = len,
                 Data = data.Skip(7).Take(len).ToArray()
             };
             Array.Resize(ref frame.Data, 8);
             return frame;
         }
-
     }
 }

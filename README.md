@@ -44,4 +44,5 @@ For details, please refer to [SerialCAN.InitCAN](/ControlCAN/SerialCAN.cs)
 
 ## TODO
 
-- ControlCAN InitCAN filter not support.
+- ControlCAN VCI_INIT_CONFIG.Filter not support.
+- ControlCAN VCI_CAN_OBJ.SendType not support.

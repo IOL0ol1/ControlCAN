@@ -14,33 +14,33 @@ namespace ControlCAN
 {
     public enum VCI_ERR : DWORD
     {
-        //CAN错误码
-        CAN_OVERFLOW = 0x0001,  //CAN控制器内部FIFO溢出
-        CAN_ERRALARM = 0x0002,  //CAN控制器错误报警
-        CAN_PASSIVE = 0x0004,  //CAN控制器消极错误
-        CAN_LOSE = 0x0008,  //CAN控制器仲裁丢失
-        CAN_BUSERR = 0x0010,  //CAN控制器总线错误
-        CAN_BUSOFF = 0x0020,  //总线关闭错误
-        CAN_BUFFER_OVERFLOW = 0x0040,  //CAN控制器内部BUFFER溢出
-        //通用错误码
-        DEVICEOPENED = 0x0100,  //设备已经打开
-        DEVICEOPEN = 0x0200,  //打开设备错误
-        DEVICENOTOPEN = 0x0400,  //设备没有打开
-        BUFFEROVERFLOW = 0x0800,  //缓冲区溢出
-        DEVICENOTEXIST = 0x1000,  //此设备不存在
-        LOADKERNELDLL = 0x2000,  //装载动态库失败
-        CMDFAILED = 0x4000,  //执行命令失败错误码
-        BUFFERCREATE = 0x8000,  //内存不足
+        /* CAN error codes */
+        CAN_OVERFLOW = 0x0001,  // CAN controller internal FIFO overflow
+        CAN_ERRALARM = 0x0002,  // CAN controller error alarm
+        CAN_PASSIVE = 0x0004,  // CAN controller passive error
+        CAN_LOSE = 0x0008,  // CAN controller arbitration lost
+        CAN_BUSERR = 0x0010,  // CAN controller bus error
+        CAN_BUSOFF = 0x0020,  // Bus off error
+        CAN_BUFFER_OVERFLOW = 0x0040,  // CAN controller internal BUFFER overflow
+        /* General error codes */
+        DEVICEOPENED = 0x0100,  // Device already opened
+        DEVICEOPEN = 0x0200,  // Open device error
+        DEVICENOTOPEN = 0x0400,  // Device not opened
+        BUFFEROVERFLOW = 0x0800,  // Buffer overflow
+        DEVICENOTEXIST = 0x1000,  // Device does not exist
+        LOADKERNELDLL = 0x2000,  // Load dynamic library failed
+        CMDFAILED = 0x4000,  // Execute command failed error code
+        BUFFERCREATE = 0x8000,  // Insufficient memory
     }
 
-    //函数调用返回状态值
+    // Function call return status values
     public enum VCI_STATUS : DWORD
     {
         OK = 1,
         ERR = 0,
     }
 
-    //1.ZLGCAN系列接口卡信息的数据类型。
+    // 1. Data type of ZLGCAN series interface card information.
     public unsafe struct VCI_BOARD_INFO
     {
         public USHORT hw_Version;
@@ -54,21 +54,21 @@ namespace ControlCAN
         public fixed USHORT Reserved[4];
     }
 
-    //2.定义CAN信息帧的数据类型。
+    // 2. Define the data type of CAN information frame.
     public unsafe struct VCI_CAN_OBJ
     {
         public UINT ID;
         public UINT TimeStamp;
         public BYTE TimeFlag;
         public BYTE SendType;
-        public BYTE RemoteFlag;//是否是远程帧
-        public BYTE ExternFlag;//是否是扩展帧
+        public BYTE RemoteFlag; // Is it a remote frame
+        public BYTE ExternFlag; // Is it an extended frame
         public BYTE DataLen;
         public fixed BYTE Data[8];
-        public fixed BYTE Reserved[3];    //Reserved[0] 第0位表示特殊的空行或者高亮帧
+        public fixed BYTE Reserved[3];    // Reserved[0] The 0th bit indicates a special blank line or highlighted frame
     }
 
-    //3.定义CAN控制器状态的数据类型。
+    // 3. Define the data type of CAN controller status.
     public struct VCI_CAN_STATUS
     {
         public UCHAR ErrInterrupt;
@@ -82,7 +82,7 @@ namespace ControlCAN
         public DWORD Reserved;
     }
 
-    //4.定义错误信息的数据类型。
+    // 4. Define the data type of error information.
     public unsafe struct VCI_ERR_INFO
     {
         public UINT ErrCode;
@@ -90,7 +90,7 @@ namespace ControlCAN
         public BYTE ArLost_ErrData;
     }
 
-    //5.定义初始化CAN的数据类型
+    // 5. Define the data type for initializing CAN
     public struct VCI_INIT_CONFIG
     {
         public DWORD AccCode;
@@ -105,25 +105,25 @@ namespace ControlCAN
     ///////// new add struct for filter /////////
     public struct VCI_FILTER_RECORD
     {
-        public DWORD ExtFrame;   //是否为扩展帧
+        public DWORD ExtFrame;   // Is it an extended frame
         public DWORD Start;
         public DWORD End;
     }
 
-    //定时自动发送帧结构
+    // Timed auto-send frame structure
     public struct VCI_AUTO_SEND_OBJ
     {
-        public BYTE Enable;     //使能本条报文 0:禁能 1:使能
-        public BYTE Index;      //报文编号     最大支持32条报文
-        public DWORD Interval;   //定时发送时间 1ms为单位
-        public VCI_CAN_OBJ Obj;    //报文
+        public BYTE Enable;     // Enable this message 0: disable 1: enable
+        public BYTE Index;      // Message number, supports up to 32 messages
+        public DWORD Interval;   // Timed send time in milliseconds
+        public VCI_CAN_OBJ Obj;    // Message
     }
 
     public unsafe static class ControlCAN
     {
         private static ILogger logger = LogManager.GetCurrentClassLogger();
         private static Dictionary<DWORD, SerialCAN> serialPorts = new Dictionary<DWORD, SerialCAN>();
-        private static DateTime openDatetime;
+        private static DateTime openTime = DateTime.Now;
 
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)], EntryPoint = nameof(VCI_OpenDevice))]
         public static DWORD VCI_OpenDevice(DWORD DeviceType, DWORD DeviceInd, DWORD Reserved)
@@ -134,7 +134,7 @@ namespace ControlCAN
                 var serial = new SerialCAN();
                 if (serial.Open(DeviceInd) == 1)
                 {
-                    openDatetime = DateTime.Now;
+                    openTime = DateTime.Now;
                     serialPorts[DeviceInd] = serial;
                     return (DWORD)VCI_STATUS.OK;
                 }
@@ -144,7 +144,7 @@ namespace ControlCAN
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)], EntryPoint = nameof(VCI_CloseDevice))]
         public static DWORD VCI_CloseDevice(DWORD DeviceType, DWORD DeviceInd)
         {
-            logger.Info($"CloseDeviceFD DeviceType:{DeviceType},DeviceInd:{DeviceInd}");
+            logger.Info($"VCI_CloseDevice DeviceType:{DeviceType},DeviceInd:{DeviceInd}");
 
             if (serialPorts.TryGetValue(DeviceInd, out var serial))
             {
@@ -154,7 +154,7 @@ namespace ControlCAN
             return (DWORD)VCI_STATUS.OK;
         }
 
-        public static Dictionary<ushort, int> timmings = new Dictionary<ushort, int>
+        public static Dictionary<ushort, int> timings = new Dictionary<ushort, int>
         {
             [0xBFFF] = 5000,
             [0x311C] = 10000,
@@ -176,13 +176,13 @@ namespace ControlCAN
         [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)], EntryPoint = nameof(VCI_InitCAN))]
         public static DWORD VCI_InitCAN(DWORD DeviceType, DWORD DeviceInd, DWORD CANInd, VCI_INIT_CONFIG* pInitConfig)
         {
-            logger.Info($"InitCANFD DeviceType:{DeviceType},DeviceInd:{DeviceInd},CANId:{CANInd}");
+            logger.Info($"VCI_InitCAN DeviceType:{DeviceType},DeviceInd:{DeviceInd},CANId:{CANInd}");
 
             if (serialPorts.TryGetValue(DeviceInd, out var device))
             {
                 var config = new SerialConfig { Mode = pInitConfig->Mode };
                 var bkey = (ushort)((pInitConfig->Timing0 << 8) | pInitConfig->Timing1);
-                if (timmings.TryGetValue(bkey, out var bps))
+                if (timings.TryGetValue(bkey, out var bps))
                     config.BaudRate = bps;
                 return device.InitCAN(CANInd, new SerialConfig { Mode = pInitConfig->Mode });
             }
@@ -324,7 +324,7 @@ namespace ControlCAN
                     pReceive[i].ExternFlag = frames[i].Ext;
                     pReceive[i].RemoteFlag = frames[i].Rtr;
                     pReceive[i].TimeFlag = 1;
-                    pReceive[i].TimeStamp = (uint)((DateTime.Now - openDatetime).TotalMilliseconds * 10);
+                    pReceive[i].TimeStamp = (uint)((frames[i].Time - openTime).TotalMicroseconds / 100);
                     Marshal.Copy(frames[i].Data, 0, (nint)pReceive[i].Data, 8);
                 }
                 return (ULONG)len;
