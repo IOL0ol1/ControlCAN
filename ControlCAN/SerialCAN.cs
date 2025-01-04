@@ -79,7 +79,7 @@ namespace ControlCAN
         private readonly ILogger logger = LogManager.GetCurrentClassLogger();
         private readonly BlockingCollection<SerialFrame> messages = new BlockingCollection<SerialFrame>();
         private readonly List<byte> received = new List<byte>();
-        private readonly SerialPort serialPort = new SerialPort() { ReadTimeout = 500, NewLine = "\r\n", BaudRate = 9600, Encoding = Encoding.ASCII };
+        private readonly SerialPort serialPort = new SerialPort() { ReadTimeout = 1000, NewLine = "\r\n", BaudRate = 115200, Encoding = Encoding.ASCII };
         private bool isStart = false;
 
         /// <summary>
@@ -171,8 +171,35 @@ namespace ControlCAN
                     {
                         if (!serialPort.IsOpen)
                             serialPort.Open();
-                        serialPort.DiscardInBuffer();
-                        serialPort.DiscardOutBuffer();
+                        // set default and switch 115200bps
+                        foreach (var baud in new[] { 115200, 9600 })
+                        {
+                            try
+                            {
+                                serialPort.BaudRate = baud;
+                                serialPort.WriteLine("AT+AT");
+                                if (serialPort.ReadLine().Contains("OK"))
+                                {
+                                    serialPort.WriteLine("AT+CG");
+                                    if (serialPort.ReadLine().Contains("OK"))
+                                    {
+                                        serialPort.WriteLine("AT+DEFAULT"); // serial 9600bps
+                                        if (serialPort.ReadLine().Contains("OK"))
+                                        {
+                                            Thread.Sleep(100);
+                                            if (baud == 9600)
+                                            {
+                                                serialPort.WriteLine("AT+USART_PARAM=115200,0,0,0"); // serial 115200bps
+                                                Thread.Sleep(100);
+                                            }
+                                            serialPort.DiscardInBuffer();
+                                        }
+                                    }
+                                }
+                            }
+                            catch { }
+                        }
+                        serialPort.BaudRate = 115200;
                         serialPort.WriteLine("AT+CG"); // config mode
                         logger.Info("AT+CG");
                         if (!serialPort.ReadLine().Contains("OK"))
