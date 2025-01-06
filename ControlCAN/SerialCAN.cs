@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.IO.Ports;
 using System.Text;
 
-namespace ControlCAN
+namespace Native
 {
     public struct SerialInfo
     {

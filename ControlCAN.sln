@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControlCAN", "ControlCAN\ControlCAN.csproj", "{DB6898FC-9FC1-42D3-A81E-9873D3155594}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{100ADB2E-D041-4007-B220-A1B030554BFA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,18 @@ Global
 		{DB6898FC-9FC1-42D3-A81E-9873D3155594}.Release|x64.Build.0 = Release|x64
 		{DB6898FC-9FC1-42D3-A81E-9873D3155594}.Release|x86.ActiveCfg = Release|Any CPU
 		{DB6898FC-9FC1-42D3-A81E-9873D3155594}.Release|x86.Build.0 = Release|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Debug|x64.Build.0 = Debug|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Debug|x86.Build.0 = Debug|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Release|x64.ActiveCfg = Release|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Release|x64.Build.0 = Release|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Release|x86.ActiveCfg = Release|Any CPU
+		{100ADB2E-D041-4007-B220-A1B030554BFA}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

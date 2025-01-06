@@ -1,11 +1,10 @@
-﻿using ControlCAN;
-using NLog;
+﻿using NLog;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace ECanFDVci
-{ 
+namespace Native
+{
     public enum SEND_MODE : byte
     {
         POSITIVE_SEND = 0,

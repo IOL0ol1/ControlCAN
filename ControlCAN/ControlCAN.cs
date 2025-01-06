@@ -10,7 +10,7 @@ using UINT = uint;
 using ULONG = uint;
 using USHORT = ushort;
 
-namespace ControlCAN
+namespace Native
 {
     public enum VCI_ERR : DWORD
     {
@@ -156,6 +156,7 @@ namespace ControlCAN
 
         public static Dictionary<ushort, int> timings = new Dictionary<ushort, int>
         {
+            /*0,1*/
             [0xBFFF] = 5000,
             [0x311C] = 10000,
             [0x181C] = 20000,
